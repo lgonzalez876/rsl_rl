@@ -11,7 +11,7 @@ import time
 import torch
 from collections import deque
 
-import rsl_rl
+import rsl_rl as rsl_rl
 from rsl_rl.algorithms import PPO
 from rsl_rl.env import VecEnv
 from rsl_rl.modules import ActorCritic, ActorCriticRecurrent, EmpiricalNormalization
@@ -57,8 +57,8 @@ class OnPolicyRunner:
         if "symmetry_cfg" in self.alg_cfg:
             # this is used by the symmetry function for handling different observation terms
             self.alg_cfg["symmetry_cfg"]["_env"] = env
-
         # init algorithm
+
         alg_class = eval(self.alg_cfg.pop("class_name"))  # PPO
         self.alg: PPO = alg_class(actor_critic, device=self.device, **self.alg_cfg)
 
@@ -83,6 +83,9 @@ class OnPolicyRunner:
 
         # Log
         self.log_dir = log_dir
+
+        print(f"Saving training results to {self.log_dir}")
+
         self.writer = None
         self.tot_timesteps = 0
         self.tot_time = 0
@@ -355,6 +358,9 @@ class OnPolicyRunner:
                                locs['start_iter'] + locs['num_learning_iterations'] - locs['it']):.1f}s\n"""
         )
         print(log_string)
+        if self.log_dir is not None:
+            with open(os.path.join(self.log_dir, "training.txt"), "a") as f:
+                f.write(log_string)
 
     def save(self, path: str, infos=None):
         # -- Save PPO model
